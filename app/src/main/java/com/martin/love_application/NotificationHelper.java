@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 import java.util.Calendar;
 
@@ -40,7 +42,7 @@ public class NotificationHelper extends BroadcastReceiver {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         int hour = prefs.getInt(NOTIFICATION_TIME_HOUR, 9); // 9 AM default
         int minute = prefs.getInt(NOTIFICATION_TIME_MINUTE, 0); // 0 minutes default
-
+        Log.d("NotificationHelper", "scheduleDailyNotification called for: " + hour + ":" + minute);
         scheduleDailyNotification(hour, minute);
     }
 
@@ -69,6 +71,8 @@ public class NotificationHelper extends BroadcastReceiver {
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
         calendar.set(Calendar.SECOND, 0);
+        Log.d("NotificationHelper", "Scheduled for: " + calendar.getTime());
+
 
         // If the time has already passed today, schedule for tomorrow
         if (calendar.getTimeInMillis() < System.currentTimeMillis()) {

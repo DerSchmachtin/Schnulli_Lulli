@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.NotificationCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         setupDatabase();
         setupNotifications();
         updateUI();
+        triggerTestNotification();
     }
 
     private void initializeViews() {
@@ -63,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         notificationHelper = new NotificationHelper(this);
         createNotificationChannel();
         // Schedule daily notifications (user can customize time later)
+        notificationHelper.cancelDailyNotification();
         notificationHelper.scheduleDailyNotification();
     }
 
@@ -73,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Personalize welcome message
         String[] welcomeMessages = {
-                "Good morning, beautiful! ☀️",
-                "Hey gorgeous! 💕",
-                "Missing you already 🥰",
-                "Hope you're having an amazing day! ✨"
+                "Guten Morgen, Hübschlie! ☀️",
+                "Na Süße! 💕",
+                "Ich vermisse dich jetzt schon 🥰",
+                "Ich wünsche dir einen schönen Tag! ✨"
         };
 
         int randomIndex = (int) (Math.random() * welcomeMessages.length);
@@ -97,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openDailyMessage() {
+//        triggerTestNotification();
+
         Intent intent = new Intent(this, DailyMessageActivity.class);
         startActivity(intent);
     }
@@ -110,12 +115,25 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Daily Love Messages";
             String description = "Daily reminders of how much you're loved";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel("LOVE_MESSAGES", name, importance);
             channel.setDescription(description);
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+    }
+
+    private void triggerTestNotification() {
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "LOVE_MESSAGES")
+                .setSmallIcon(android.R.drawable.ic_dialog_info) // sicheres Test-Icon
+                .setContentTitle("Test ❤️")
+                .setContentText("Deine erste Notification ist da!")
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // hoch setzen, damit sichtbar
+                .setAutoCancel(false); // verschwindet nach Klick
+
+        notificationManager.notify(1, builder.build());
     }
 }

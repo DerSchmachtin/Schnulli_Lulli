@@ -32,7 +32,7 @@ public class DailyMessageActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        messageText = findViewById(R.id.message_text);
+        messageText = findViewById(R.id.view_message_button);
         messageDate = findViewById(R.id.message_date);
         messageType = findViewById(R.id.message_type);
         backButton = findViewById(R.id.back_button);
