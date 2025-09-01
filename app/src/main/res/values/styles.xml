@@ -1,0 +1,15 @@
+<resources>
+    <!-- Your app theme -->
+    <style name="Theme.LoveApplication" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/pink_500</item>
+        <item name="colorSecondary">@color/red_500</item>
+        <item name="android:windowBackground">@color/background</item>
+    </style>
+
+    <!-- Custom Material3 button style -->
+    <style name="Widget.LoveApp.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">16dp</item>
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+</resources>

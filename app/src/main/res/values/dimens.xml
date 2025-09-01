@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Space between timeline items -->
+    <dimen name="timeline_item_spacing">12dp</dimen>
+</resources>
