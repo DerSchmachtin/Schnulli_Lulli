@@ -1,0 +1,226 @@
+{
+  "messages": {
+    "msg1": {
+      "text": "Du bist das Beste was mir je passiert ist! Jeder Tag mit dir ist ein Geschenk 💝",
+      "type": "love_note",
+      "unlock_date": "2024-12-05"
+    },
+    "msg2": {
+      "text": "Erinnerst du dich an unseren ersten Kuss? Mein Herz schlägt immer noch genauso schnell 💋",
+      "type": "memory",
+      "unlock_date": "2024-12-06"
+    },
+    "msg3": {
+      "text": "Ich bin so dankbar für jeden Moment den wir zusammen verbringen. Du machst mein Leben vollständig ❤️",
+      "type": "gratitude",
+      "unlock_date": "2024-12-07"
+    },
+    "msg4": {
+      "text": "Du weißt noch wie du damals gesagt hast 'Ich bin müde'... und dann 3 Stunden lang geredet hast? 😂",
+      "type": "inside_joke",
+      "unlock_date": "2024-12-08"
+    },
+    "msg5": {
+      "text": "Ich kann es kaum erwarten unseren nächsten gemeinsamen Urlaub zu planen! Wo soll es hingehen? 🏝️",
+      "type": "future_dream",
+      "unlock_date": "2024-12-09"
+    },
+    "msg6": {
+      "text": "Du bist so unglaublich stark und mutig. Ich bewundere dich jeden Tag mehr 💪",
+      "type": "encouragement",
+      "unlock_date": "2024-12-10"
+    },
+    "msg7": {
+      "text": "Auch wenn wir manchmal streiten, weiß ich dass wir zusammen alles schaffen können 💕",
+      "type": "appreciation",
+      "unlock_date": "2024-12-11"
+    },
+    "msg8": {
+      "text": "Dein Lachen ist das schönste Geräusch auf der Welt. Es macht jeden schlechten Tag zu einem guten 😊",
+      "type": "love_note",
+      "unlock_date": "2024-12-12"
+    },
+    "msg9": {
+      "text": "Weißt du noch wie wir uns das erste Mal 'Ich liebe dich' gesagt haben? Perfekter Moment 💖",
+      "type": "memory",
+      "unlock_date": "2024-12-13"
+    },
+    "msg10": {
+      "text": "In diesem Jahr ist so viel Schönes passiert - und das Schönste davon bist du ✨",
+      "type": "seasonal",
+      "unlock_date": "2024-12-14"
+    },
+    "msg11": {
+      "text": "Danke dass du immer für mich da bist, besonders wenn ich es am meisten brauche 🤗",
+      "type": "gratitude",
+      "unlock_date": "2024-12-15"
+    },
+    "msg12": {
+      "text": "Du erinnerst dich an unser Geheimwort für 'Ich liebe dich'? *zwinkert* 😉",
+      "type": "inside_joke",
+      "unlock_date": "2024-12-16"
+    },
+    "msg13": {
+      "text": "Eines Tages werden wir in unserem eigenen Zuhause aufwachen und es wird perfekt sein 🏠",
+      "type": "future_dream",
+      "unlock_date": "2024-12-17"
+    },
+    "msg14": {
+      "text": "Du schaffst alles was du dir vornimmst. Ich glaube so sehr an dich! 🌟",
+      "type": "encouragement",
+      "unlock_date": "2024-12-18"
+    },
+    "msg15": {
+      "text": "Wie du dich um andere kümmerst zeigt mir jeden Tag was für ein wundervoller Mensch du bist 💝",
+      "type": "appreciation",
+      "unlock_date": "2024-12-19"
+    },
+    "msg16": {
+      "text": "Mit dir fühle ich mich zuhause, egal wo wir sind. Du bist meine sichere Zuflucht 🏡",
+      "type": "love_note",
+      "unlock_date": "2024-12-20"
+    },
+    "msg17": {
+      "text": "Unser erstes gemeinsames Weihnachten war magisch. Ich freue mich auf alle weiteren! 🎄",
+      "type": "memory",
+      "unlock_date": "2024-12-21"
+    },
+    "msg18": {
+      "text": "Die Weihnachtszeit mit dir ist noch schöner als alle Filme es versprechen ❄️",
+      "type": "seasonal",
+      "unlock_date": "2024-12-22"
+    },
+    "msg19": {
+      "text": "Du bist süßer als alle Kekse die wir zusammen gebacken haben 🍪",
+      "type": "sweet",
+      "unlock_date": "2024-12-23"
+    },
+    "msg20": {
+      "text": "Das schönste Geschenk dieses Jahr warst du - jeden einzelnen Tag ❤️🎁",
+      "type": "seasonal",
+      "unlock_date": "2024-12-24"
+    }
+  },
+  "timeline_events": {
+    "event1": {
+      "title": "Unser erstes Date",
+      "date": "2024-09-15",
+      "type": "memory",
+      "description": "Nervös und aufgeregt, aber es war perfekt. Der Anfang von allem ❤️"
+    },
+    "event2": {
+      "title": "Erstes 'Ich liebe dich'",
+      "date": "2024-10-02",
+      "type": "love_note", 
+      "description": "Unter dem Sternenhimmel im Park. Ich werde diesen Moment nie vergessen 🌟"
+    },
+    "event3": {
+      "title": "Gemeinsamer Kinoabend",
+      "date": "2024-10-10",
+      "type": "memory",
+      "description": "Wir haben mehr gekuschelt als den Film geschaut 🍿"
+    },
+    "event4": {
+      "title": "Kochen-Disaster",
+      "date": "2024-10-18",
+      "type": "inside_joke",
+      "description": "Die Küche war ein Schlachtfeld, aber wir haben so viel gelacht 😂"
+    },
+    "event5": {
+      "title": "Spontaner Roadtrip",
+      "date": "2024-10-25",
+      "type": "memory",
+      "description": "Einfach ins Auto und losgefahren. Die besten Abenteuer sind ungeplant 🚗"
+    },
+    "event6": {
+      "title": "Halloween zusammen",
+      "date": "2024-10-31",
+      "type": "seasonal",
+      "description": "Die besten Kostüme und noch bessere Gesellschaft 🎃"
+    },
+    "event7": {
+      "title": "Erstes 'Ich vermisse dich'",
+      "date": "2024-11-05",
+      "type": "love_note",
+      "description": "Nur einen Tag getrennt und schon war die Sehnsucht da 💕"
+    },
+    "event8": {
+      "title": "Gemeinsam kochen (erfolgreich!)",
+      "date": "2024-11-12",
+      "type": "memory",
+      "description": "Diesmal ist nichts angebrannt! Wir lernen dazu 👨‍🍳👩‍🍳"
+    },
+    "event9": {
+      "title": "Erster Schnee zusammen",
+      "date": "2024-11-20",
+      "type": "seasonal",
+      "description": "Schneeball schlacht und warme Schokolade. Perfekter Wintertag ❄️"
+    },
+    "event10": {
+      "title": "Spieleabend-Marathon",
+      "date": "2024-11-22",
+      "type": "memory",
+      "description": "6 Stunden Monopoly. Du hast gewonnen (wie immer) 🎲"
+    },
+    "event11": {
+      "title": "Unser Geheimwort erfunden",
+      "date": "2024-11-28",
+      "type": "inside_joke",
+      "description": "Jetzt können wir 'Ich liebe dich' sagen ohne dass es jemand merkt 😉"
+    },
+    "event12": {
+      "title": "Weihnachtsmarkt-Besuch",
+      "date": "2024-12-01",
+      "type": "seasonal",
+      "description": "Glühwein, gebrannte Mandeln und deine kalten Hände in meinen 🎄"
+    },
+    "event13": {
+      "title": "Gemeinsam Geschenke einpacken",
+      "date": "2024-12-05",
+      "type": "seasonal",
+      "description": "Mehr Geschenkpapier überall außer um die Geschenke 🎁"
+    },
+    "event14": {
+      "title": "Pläne für den Sommer gemacht",
+      "date": "2024-12-08",
+      "type": "future_dream",
+      "description": "Stundenlang über unseren Traumurlaub geredet. Ich kann es kaum erwarten! 🏖️"
+    },
+    "event15": {
+      "title": "Kekse gebacken",
+      "date": "2024-12-12",
+      "type": "seasonal",
+      "description": "Die Hälfte ist im Ofen gelandet, die andere Hälfte haben wir roh genascht 🍪"
+    },
+    "event16": {
+      "title": "Geschenke-Verstecken-Mission",
+      "date": "2024-12-15",
+      "type": "inside_joke",
+      "description": "Du versuchst deine Geschenke zu verstecken aber ich weiß wo sie sind 🕵️"
+    },
+    "event17": {
+      "title": "Gemeinsam Weihnachtsfilm-Marathon",
+      "date": "2024-12-18",
+      "type": "seasonal",
+      "description": "Liebe Tatsächlich, Der Grinch, und du hast bei allen geweint 🎬"
+    },
+    "event18": {
+      "title": "Weihnachtsbäume anschauen",
+      "date": "2024-12-20",
+      "type": "seasonal", 
+      "description": "Nach 3 Stunden den 'perfekten' Baum gefunden (der erste war auch schon perfekt) 🎄"
+    },
+    "event19": {
+      "title": "Letzte Geschenke besorgt",
+      "date": "2024-12-22",
+      "type": "memory",
+      "description": "Panisch durch die Stadt gerannt aber alles geschafft! Teamwork 🛍️"
+    },
+    "event20": {
+      "title": "Heiligabend zusammen",
+      "date": "2024-12-24",
+      "type": "seasonal",
+      "description": "Unser erstes gemeinsames Weihnachten. Der Beginn einer schönen Tradition 🎅"
+    }
+  }
+}

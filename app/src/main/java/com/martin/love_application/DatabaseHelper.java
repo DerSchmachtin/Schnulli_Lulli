@@ -485,4 +485,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             event.getDescription(), event.getPhotos(), event.getType());
         return result != -1;
     }
+    
+    // Firebase complete sync methods
+    public void clearAllMessages() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_MESSAGES, null, null);
+        db.close();
+        Log.d("DatabaseHelper", "All messages cleared for Firebase sync");
+    }
+    
+    public void clearAllTimelineEvents() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_TIMELINE, null, null);
+        db.close();
+        Log.d("DatabaseHelper", "All timeline events cleared for Firebase sync");
+    }
 }

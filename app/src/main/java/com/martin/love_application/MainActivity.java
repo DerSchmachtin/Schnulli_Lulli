@@ -149,12 +149,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                     
                     if (newMessagesCount > 0) {
-                        Log.d("MainActivity", "Successfully added " + newMessagesCount + " new messages");
+                        Log.d("MainActivity", "Successfully synced " + newMessagesCount + " messages");
                         Toast.makeText(MainActivity.this,
-                                "❤️ " + newMessagesCount + " neue Nachrichten hinzugefügt!",
+                                "❤️ " + newMessagesCount + " Nachrichten synchronisiert!",
                                 Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "✅ Nachrichten sind aktuell", Toast.LENGTH_SHORT).show();
+                    } else if (newMessagesCount == 0) {
+                        Log.d("MainActivity", "Messages are up to date - no changes");
+                        Toast.makeText(MainActivity.this, "✅ Nachrichten sind bereits aktuell", Toast.LENGTH_SHORT).show();
                     }
                     // Reload today's message after successful sync
                     loadTodaysMessage();
@@ -186,9 +187,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int newEventsCount) {
                 if (newEventsCount > 0) {
-                    Log.d("MainActivity", "Successfully added " + newEventsCount + " new timeline events");
+                    Log.d("MainActivity", "Successfully synced " + newEventsCount + " timeline events");
                     Toast.makeText(MainActivity.this,
-                            "❤️ " + newEventsCount + " neue Timeline-Events hinzugefügt!",
+                            "📅 " + newEventsCount + " Timeline-Events synchronisiert!",
                             Toast.LENGTH_SHORT).show();
                 }
             }

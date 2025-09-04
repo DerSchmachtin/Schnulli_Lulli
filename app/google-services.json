@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "811748979695",
+    "project_id": "love-application-78ecb",
+    "firebase_url": "https://love-application-78ecb-default-rtdb.europe-west1.firebasedatabase.app",
+    "storage_bucket": "love-application-78ecb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811748979695:android:8df9dad0e6d227af6a7c1a",
+        "android_client_info": {
+          "package_name": "com.martin.love_application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAA76X6n1jFNAiaVLt5AVWjNW0JOX3VZa8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
