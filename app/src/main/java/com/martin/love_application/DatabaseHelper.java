@@ -5,6 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,11 +44,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private final Context context;
 
+    private static DatabaseHelper instance; // 👈 Declare the static instance
 
-    public DatabaseHelper(Context context) {
+    // Make the constructor private
+    private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
     }
+
+    /**
+     * Gets the single instance of the DatabaseHelper.
+     * @param context The application context.
+     * @return The single instance of DatabaseHelper.
+     */
+    public static synchronized DatabaseHelper getInstance(Context context) {
+        if (instance == null) {
+            // Use application context to prevent memory leaks
+            instance = new DatabaseHelper(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+
+//    public DatabaseHelper(Context context) {
+//        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+//        this.context = context;
+//    }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -68,6 +94,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL(createMessagesTable);
         db.execSQL(createTimelineTable);
+
+        // Call the single method to populate all initial data
+        insertInitialData(db);
     }
 
     @Override
@@ -77,6 +106,75 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    // New master method to handle all initial data insertion
+    private void insertInitialData(SQLiteDatabase db) {
+        // Skip loading initial data - app will start empty and use GitHub data only
+        Log.d("DatabaseHelper", "Skipping initial data insertion - using GitHub data only");
+    }
+
+    private void loadMessagesFromFile(SQLiteDatabase db) {
+        try {
+            InputStream is = context.getAssets().open("messages.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            String line;
+            int dayOffset = 0;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\|");
+                if (parts.length == 2) {
+                    String messageType = parts[0];
+                    String messageText = parts[1];
+                    long timeMillis = System.currentTimeMillis() + (dayOffset * 24 * 60 * 60 * 1000L);
+                    String date = sdf.format(new Date(timeMillis));
+
+                    ContentValues values = new ContentValues();
+                    values.put(COLUMN_MESSAGE_TEXT, messageText);
+                    values.put(COLUMN_MESSAGE_TYPE, messageType);
+                    values.put(COLUMN_MESSAGE_DATE, date);
+                    values.put(COLUMN_IS_UNLOCKED, 0);
+                    db.insert(TABLE_MESSAGES, null, values);
+
+                    dayOffset++;
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            Log.e("DatabaseHelper", "Error reading messages.txt file", e);
+        }
+    }
+
+    private void loadTimelineEventsFromFile(SQLiteDatabase db) {
+        try {
+            InputStream is = context.getAssets().open("timeline_events.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String jsonString = new String(buffer, "UTF-8");
+
+            JSONArray timelineArray = new JSONArray(jsonString);
+
+            for (int i = 0; i < timelineArray.length(); i++) {
+                JSONObject eventObject = timelineArray.getJSONObject(i);
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_EVENT_DATE, eventObject.getString("date"));
+                values.put(COLUMN_EVENT_TITLE, eventObject.getString("title"));
+                values.put(COLUMN_EVENT_DESCRIPTION, eventObject.getString("description"));
+                values.put(COLUMN_EVENT_TYPE, eventObject.getString("type"));
+                if (eventObject.has("photos")) {
+                    values.put(COLUMN_EVENT_PHOTOS, eventObject.getString("photos"));
+                } else {
+                    values.put(COLUMN_EVENT_PHOTOS, "");
+                }
+                db.insert(TABLE_TIMELINE, null, values);
+            }
+        } catch (IOException e) {
+            Log.e("DatabaseHelper", "Error reading timeline JSON file", e);
+        } catch (JSONException e) {
+            Log.e("DatabaseHelper", "Error parsing timeline JSON", e);
+        }
+    }
     // Insert daily message
     public long insertMessage(String messageText, String messageType, String date) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -120,11 +218,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Message message = null;
         if (cursor.moveToFirst()) {
             message = new Message();
-            message.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_MESSAGE_ID)));
-            message.setText(cursor.getString(cursor.getColumnIndex(COLUMN_MESSAGE_TEXT)));
-            message.setType(cursor.getString(cursor.getColumnIndex(COLUMN_MESSAGE_TYPE)));
-            message.setDate(cursor.getString(cursor.getColumnIndex(COLUMN_MESSAGE_DATE)));
-            message.setUnlocked(cursor.getInt(cursor.getColumnIndex(COLUMN_IS_UNLOCKED)) == 1);
+            message.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_ID)));
+            message.setText(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TEXT)));
+            message.setType(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TYPE)));
+            message.setDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_DATE)));
+            message.setUnlocked(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_UNLOCKED)) == 1);
         }
 
         cursor.close();
@@ -144,12 +242,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 TimelineEvent event = new TimelineEvent();
-                event.setId(cursor.getInt(cursor.getColumnIndex(COLUMN_TIMELINE_ID)));
-                event.setDate(cursor.getString(cursor.getColumnIndex(COLUMN_EVENT_DATE)));
-                event.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_EVENT_TITLE)));
-                event.setDescription(cursor.getString(cursor.getColumnIndex(COLUMN_EVENT_DESCRIPTION)));
-                event.setPhotos(cursor.getString(cursor.getColumnIndex(COLUMN_EVENT_PHOTOS)));
-                event.setType(cursor.getString(cursor.getColumnIndex(COLUMN_EVENT_TYPE)));
+                event.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_TIMELINE_ID)));
+                event.setDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_DATE)));
+                event.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_TITLE)));
+                event.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_DESCRIPTION)));
+                event.setPhotos(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_PHOTOS)));
+                event.setType(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EVENT_TYPE)));
                 events.add(event);
             } while (cursor.moveToNext());
         }
@@ -172,7 +270,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Sample data insertion - YOU'LL CUSTOMIZE THIS!
-    public void insertSampleData() {
+    public void insertSampleData2() {
         // Check if data already exists
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_MESSAGES, null);
@@ -214,6 +312,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "", "milestone");
     }
 
+    public void insertSampleData() {
+        // Check if data already exists
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_TIMELINE, null);
+        cursor.moveToFirst();
+        int count = cursor.getInt(0);
+        cursor.close();
+        db.close();
+
+        if (count > 0) return; // Data already exists
+
+        try {
+            // Load JSON data from the assets folder
+            InputStream is = this.context.getAssets().open("timeline_events.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String jsonString = new String(buffer, "UTF-8");
+
+            // Parse JSON array
+            JSONArray timelineArray = new JSONArray(jsonString);
+
+            // Insert timeline events from JSON
+            for (int i = 0; i < timelineArray.length(); i++) {
+                JSONObject eventObject = timelineArray.getJSONObject(i);
+                String date = eventObject.getString("date");
+                String title = eventObject.getString("title");
+                String description = eventObject.getString("description");
+                String type = eventObject.getString("type");
+                insertTimelineEvent(date, title, description, "", type);
+            }
+
+        } catch (IOException e) {
+            Log.e("DBHelper", "Error reading timeline JSON file", e);
+        } catch (JSONException e) {
+            Log.e("DBHelper", "Error parsing timeline JSON", e);
+        }
+    }
+
     private void loadMessagesFromFile() {
         try {
             InputStream is = context.getAssets().open("messages.txt");
@@ -241,5 +379,80 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+            * Check if a message exists for the given date
+ */
+    public boolean hasMessageForDate(String date) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_MESSAGES,
+                new String[]{COLUMN_MESSAGE_ID},
+                COLUMN_MESSAGE_DATE + "=?",
+                new String[]{date},
+                null, null, null);
+
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return exists;
+    }
+
+    /**
+     * Get all messages (for debugging or display)
+     */
+
+    /**
+     * Check if a timeline event exists for the given date and title
+     */
+    public boolean hasTimelineEventForDateAndTitle(String date, String title) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_TIMELINE,
+                new String[]{COLUMN_TIMELINE_ID},
+                COLUMN_EVENT_DATE + "=? AND " + COLUMN_EVENT_TITLE + "=?",
+                new String[]{date, title},
+                null, null, null);
+
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return exists;
+    }
+
+    /**
+     * Get timeline events count (for debugging)
+     */
+    public int getTimelineEventsCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_TIMELINE, null);
+        cursor.moveToFirst();
+        int count = cursor.getInt(0);
+        cursor.close();
+        db.close();
+        return count;
+    }
+    public List<Message> getAllMessages() {
+        List<Message> messages = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_MESSAGES,
+                null, null, null, null, null,
+                COLUMN_MESSAGE_DATE + " ASC");
+
+        if (cursor.moveToFirst()) {
+            do {
+                Message message = new Message();
+                message.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_ID)));
+                message.setText(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TEXT)));
+                message.setType(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TYPE)));
+                message.setDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_DATE)));
+                message.setUnlocked(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_UNLOCKED)) == 1);
+                messages.add(message);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return messages;
     }
 }

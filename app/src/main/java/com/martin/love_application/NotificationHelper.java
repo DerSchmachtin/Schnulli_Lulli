@@ -92,11 +92,11 @@ public class NotificationHelper extends BroadcastReceiver {
 
     private void showDailyNotification(Context context) {
         // Get today's message from database
-        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(context);
         Message todaysMessage = dbHelper.getTodaysMessage();
 
-        String notificationTitle = "💕 Daily Love Message";
-        String notificationText = "Your daily dose of love is waiting! ❤️";
+        String notificationTitle = "💕 Deine tägliche Liebesnachricht";
+        String notificationText = "Deine tägliche Portion Liebe wartet auf dich! ❤️";
 
         if (todaysMessage != null) {
             // Create a preview of the message (first 50 characters)
@@ -118,8 +118,8 @@ public class NotificationHelper extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Create intent to directly open daily message
-        Intent directIntent = new Intent(context, DailyMessageActivity.class);
+        // Create intent to directly open main activity (where daily message is now shown)
+        Intent directIntent = new Intent(context, MainActivity.class);
         PendingIntent directPendingIntent = PendingIntent.getActivity(
                 context,
                 1,
@@ -136,14 +136,14 @@ public class NotificationHelper extends BroadcastReceiver {
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(notificationText))
-                .addAction(R.drawable.ic_heart, "Read Message", directPendingIntent);
+                .addAction(R.drawable.ic_heart, "Nachricht lesen", directPendingIntent);
 
         // Add some personality to the notification
         String[] expandedTexts = {
-                "Someone special is thinking about you! 💕",
-                "A little love note just for you ❤️",
-                "Your daily reminder of how amazing you are! ✨",
-                "Love is in the air... and in your phone! 🥰"
+                "Jemand Besonderes denkt an dich! 💕",
+                "Eine kleine Liebesnotiz nur für dich ❤️",
+                "Deine tägliche Erinnerung daran, wie toll du bist! ✨",
+                "Liebe liegt in der Luft... und in deinem Handy! 🥰"
         };
 
         int randomIndex = (int) (Math.random() * expandedTexts.length);

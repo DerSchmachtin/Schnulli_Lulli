@@ -40,7 +40,6 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
 
         // Set title
         holder.titleText.setText(event.getTitle());
-
         // Set description
         holder.descriptionText.setText(event.getDescription());
 
@@ -53,6 +52,9 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
 
         // Set card background color based on type
         setCardColor(holder.cardView, event.getType());
+        
+        // Set text colors for good contrast
+        setTextColors(holder, event.getType());
 
         // Handle click to expand/collapse description
         holder.cardView.setOnClickListener(v -> {
@@ -109,6 +111,9 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             case "funny":
                 iconResource = R.drawable.ic_smile;
                 break;
+            case "memory":
+                iconResource = R.drawable.ic_cloud;
+                break;
             default:
                 iconResource = R.drawable.ic_heart;
                 break;
@@ -126,7 +131,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
         int colorResource;
         switch (eventType) {
             case "milestone":
-                colorResource = R.color.milestone_color; // You'll define this in colors.xml
+                colorResource = R.color.milestone_color;
                 break;
             case "holiday":
                 colorResource = R.color.holiday_color;
@@ -140,6 +145,9 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             case "funny":
                 colorResource = R.color.funny_color;
                 break;
+            case "memory":
+                colorResource = R.color.adventure_color; // Reuse green for memory
+                break;
             default:
                 colorResource = R.color.default_card_color;
                 break;
@@ -152,6 +160,45 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             // Fallback to default color
             cardView.setCardBackgroundColor(context.getResources().getColor(android.R.color.white));
         }
+    }
+
+    private void setTextColors(TimelineViewHolder holder, String eventType) {
+        int textColor;
+        
+        // Determine if we need dark or light text based on background color
+        switch (eventType) {
+            case "milestone":
+                // Pink background - use dark text
+                textColor = context.getResources().getColor(android.R.color.black);
+                break;
+            case "holiday":
+                // Yellow background - use dark text
+                textColor = context.getResources().getColor(android.R.color.black);
+                break;
+            case "adventure":
+            case "memory":
+                // Green background - use white text
+                textColor = context.getResources().getColor(android.R.color.white);
+                break;
+            case "special":
+                // Orange background - use dark text
+                textColor = context.getResources().getColor(android.R.color.black);
+                break;
+            case "funny":
+                // Blue background - use white text
+                textColor = context.getResources().getColor(android.R.color.white);
+                break;
+            default:
+                // Default (purple) background - use white text
+                textColor = context.getResources().getColor(android.R.color.white);
+                break;
+        }
+
+        // Apply text color to all text views
+        holder.titleText.setTextColor(textColor);
+        holder.descriptionText.setTextColor(textColor);
+        holder.dateText.setTextColor(textColor);
+        holder.expandIcon.setTextColor(textColor);
     }
 
     // Method to update the timeline events (useful for refreshing data)

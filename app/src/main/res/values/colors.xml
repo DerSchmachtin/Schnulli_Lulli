@@ -10,10 +10,30 @@
     <color name="pink_500">#EC407A</color>   <!-- Primary pink -->
     <color name="red_500">#F44336</color>    <!-- Secondary red -->
     <color name="background">#FFFFFF</color> <!-- Background white -->
-    <color name="milestone_color">#FFC0CB</color>
-    <color name="holiday_color">#FFEB3B</color>
-    <color name="adventure_color">#4CAF50</color>
-    <color name="special_color">#FF9800</color>
-    <color name="funny_color">#03A9F4</color>
-    <color name="default_card_color">#FFFFFF</color>
+    <color name="milestone_color">#FFB3BA</color>     <!-- Light pink - good for dark text -->
+    <color name="holiday_color">#FFFFCC</color>      <!-- Light yellow - good for dark text -->
+    <color name="adventure_color">#2E7D32</color>    <!-- Dark green - good for white text -->
+    <color name="special_color">#FFB74D</color>      <!-- Light orange - good for dark text -->
+    <color name="funny_color">#1976D2</color>        <!-- Dark blue - good for white text -->
+    <color name="default_card_color">#9C27B0</color>  <!-- Dark purple - good for white text -->
+    
+    <!-- Message type colors -->
+    <color name="love_note_bg">#FCE4EC</color>        <!-- Light pink background -->
+    <color name="love_note_text">#880E4F</color>      <!-- Dark pink text -->
+    <color name="memory_bg">#E8F5E8</color>          <!-- Light green background -->
+    <color name="memory_text">#1B5E20</color>        <!-- Dark green text -->
+    <color name="appreciation_bg">#FFF3E0</color>    <!-- Light orange background -->
+    <color name="appreciation_text">#E65100</color>  <!-- Dark orange text -->
+    <color name="inside_joke_bg">#E3F2FD</color>     <!-- Light blue background -->
+    <color name="inside_joke_text">#0D47A1</color>   <!-- Dark blue text -->
+    <color name="future_dream_bg">#F3E5F5</color>    <!-- Light purple background -->
+    <color name="future_dream_text">#4A148C</color>  <!-- Dark purple text -->
+    <color name="gratitude_bg">#FFFDE7</color>       <!-- Light yellow background -->
+    <color name="gratitude_text">#F57F17</color>     <!-- Dark yellow text -->
+    <color name="encouragement_bg">#E0F2F1</color>   <!-- Light teal background -->
+    <color name="encouragement_text">#004D40</color> <!-- Dark teal text -->
+    <color name="seasonal_bg">#FFF8E1</color>        <!-- Light amber background -->
+    <color name="seasonal_text">#FF6F00</color>      <!-- Dark amber text -->
+    <color name="sweet_bg">#FCE4EC</color>           <!-- Light pink background -->
+    <color name="sweet_text">#880E4F</color>         <!-- Dark pink text -->
 </resources>

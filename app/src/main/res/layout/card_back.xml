@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- Message Icon -->
+    <ImageView
+        android:id="@+id/message_icon_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Hidden fields for data -->
+    <TextView
+        android:id="@+id/message_date_back"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/message_type_back"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"/>
+
+    <!-- Main Message Text -->
+    <TextView
+        android:id="@+id/message_text_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Loading your daily message..."
+        android:textSize="18sp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"/>
+
+</LinearLayout>
