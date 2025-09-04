@@ -26,7 +26,18 @@
         android:text="0 tolle Tage mit dir ❤️"
         android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="32dp"/>
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Sync Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sync_button_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🔄 Aktualisieren"
+        android:textSize="14sp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.Material3.Button.TonalButton"/>
 
     <!-- Daily Message Card with Flip Animation -->
     <FrameLayout
@@ -94,5 +105,6 @@
             android:insetBottom="0dp"
             android:layout_margin="10dp"/>
     </com.google.android.material.card.MaterialCardView>
+
 
 </LinearLayout>

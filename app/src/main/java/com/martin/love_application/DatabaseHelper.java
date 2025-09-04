@@ -455,4 +455,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return messages;
     }
+    
+    // Firebase compatibility methods
+    public boolean messageExists(String text, String unlockDate) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_MESSAGES,
+                new String[]{COLUMN_MESSAGE_ID},
+                COLUMN_MESSAGE_TEXT + "=? AND " + COLUMN_MESSAGE_DATE + "=?",
+                new String[]{text, unlockDate},
+                null, null, null);
+
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        db.close();
+        return exists;
+    }
+    
+    public boolean addMessage(Message message) {
+        long result = insertMessage(message.getText(), message.getType(), message.getUnlockDate());
+        return result != -1;
+    }
+    
+    public boolean timelineEventExists(String title, String date) {
+        return hasTimelineEventForDateAndTitle(date, title);
+    }
+    
+    public boolean addTimelineEvent(TimelineEvent event) {
+        long result = insertTimelineEvent(event.getDate(), event.getTitle(), 
+            event.getDescription(), event.getPhotos(), event.getType());
+        return result != -1;
+    }
 }

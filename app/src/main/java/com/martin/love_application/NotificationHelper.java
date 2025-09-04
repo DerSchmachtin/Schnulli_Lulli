@@ -38,9 +38,9 @@ public class NotificationHelper extends BroadcastReceiver {
     }
 
     public void scheduleDailyNotification() {
-        // Get user's preferred notification time (default to 9:00 AM)
+        // Get user's preferred notification time (default to 10:00 PM)
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        int hour = prefs.getInt(NOTIFICATION_TIME_HOUR, 9); // 9 AM default
+        int hour = prefs.getInt(NOTIFICATION_TIME_HOUR, 22); // 10 PM default
         int minute = prefs.getInt(NOTIFICATION_TIME_MINUTE, 0); // 0 minutes default
         Log.d("NotificationHelper", "scheduleDailyNotification called for: " + hour + ":" + minute);
         scheduleDailyNotification(hour, minute);
@@ -91,20 +91,27 @@ public class NotificationHelper extends BroadcastReceiver {
     }
 
     private void showDailyNotification(Context context) {
-        // Get today's message from database
+        // Check if message has been viewed today
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String today = java.text.DateFormat.getDateInstance().format(new java.util.Date());
+        String lastViewedDate = prefs.getString("last_viewed_date", "");
+        
+        // Only send notification if message hasn't been viewed today
+        if (today.equals(lastViewedDate)) {
+            Log.d("NotificationHelper", "Message already viewed today, skipping notification");
+            return;
+        }
+
+        // Get today's message from database to check if one exists
         DatabaseHelper dbHelper = DatabaseHelper.getInstance(context);
         Message todaysMessage = dbHelper.getTodaysMessage();
 
-        String notificationTitle = "💕 Deine tägliche Liebesnachricht";
-        String notificationText = "Deine tägliche Portion Liebe wartet auf dich! ❤️";
+        String notificationTitle = "💕 Erinnerung an deine tägliche Nachricht";
+        String notificationText = "Du hast heute noch nicht deine Liebesnachricht angeschaut! ❤️";
 
-        if (todaysMessage != null) {
-            // Create a preview of the message (first 50 characters)
-            String messagePreview = todaysMessage.getText();
-            if (messagePreview.length() > 50) {
-                messagePreview = messagePreview.substring(0, 50) + "...";
-            }
-            notificationText = messagePreview;
+        // Don't spoil the message - just remind them to check
+        if (todaysMessage == null) {
+            notificationText = "Keine Nachricht für heute verfügbar. Bitte synchronisiere die App! 💕";
         }
 
         // Create intent to open the app when notification is tapped
@@ -190,5 +197,13 @@ public class NotificationHelper extends BroadcastReceiver {
             return notificationManager.areNotificationsEnabled();
         }
         return true; // Assume enabled for older versions
+    }
+    
+    // Mark message as viewed today
+    public void markMessageViewed(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String today = java.text.DateFormat.getDateInstance().format(new java.util.Date());
+        prefs.edit().putString("last_viewed_date", today).apply();
+        Log.d("NotificationHelper", "Message marked as viewed for: " + today);
     }
 }

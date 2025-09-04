@@ -5,15 +5,18 @@ public class Message {
     private String text;
     private String type;
     private String date;
+    private String unlockDate;
     private boolean isUnlocked;
 
     // Constructors
     public Message() {}
 
-    public Message(String text, String type, String date) {
+    // Constructor for Firebase/new data (uses unlockDate)
+    public Message(String text, String type, String unlockDate) {
         this.text = text;
         this.type = type;
-        this.date = date;
+        this.unlockDate = unlockDate;
+        this.date = unlockDate; // For compatibility
         this.isUnlocked = false;
     }
 
@@ -56,5 +59,13 @@ public class Message {
 
     public void setUnlocked(boolean unlocked) {
         isUnlocked = unlocked;
+    }
+
+    public String getUnlockDate() {
+        return unlockDate;
+    }
+
+    public void setUnlockDate(String unlockDate) {
+        this.unlockDate = unlockDate;
     }
 }

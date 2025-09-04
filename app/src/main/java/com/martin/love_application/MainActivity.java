@@ -7,6 +7,7 @@ import android.animation.AnimatorSet;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,9 +19,12 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.firebase.FirebaseApp;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private MaterialCardView cardBack;
     private CardView timelineCard;
     private MaterialButton viewTimelineButton;
+    private MaterialButton syncButtonMain;
+    
     
     // Daily message views (back card)
     private TextView messageText;
@@ -47,22 +53,28 @@ public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
     private NotificationHelper notificationHelper;
-    private NetworkDataManager networkManager;
+    private FirebaseDataManager firebaseManager;
 
     // Your relationship start date - UPDATE THIS!
     private static final String RELATIONSHIP_START = "2024-11-01"; // Format: YYYY-MM-DD
+    
+    // Permission request code
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Initialize Firebase explicitly
+        FirebaseApp.initializeApp(this);
+        
         setContentView(R.layout.activity_main);
 
         initializeViews();
         setupDatabase();
+        checkNotificationPermission();
         setupNotifications();
         updateUI();
-        loadTodaysMessage();
-        triggerTestNotification();
     }
 
     private void initializeViews() {
@@ -72,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         cardBack = findViewById(R.id.card_back);
         timelineCard = findViewById(R.id.timeline_card);
         viewTimelineButton = findViewById(R.id.view_timeline_button);
+        syncButtonMain = findViewById(R.id.sync_button_main);
         
         // Daily message views (from back card)
         messageText = findViewById(R.id.message_text_back);
@@ -84,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         viewTimelineButton.setOnClickListener(v -> openTimeline());
         cardFront.setOnClickListener(v -> flipCard());
         cardBack.setOnClickListener(v -> flipCard());
+        syncButtonMain.setOnClickListener(v -> manualSync());
         
         // Set camera distance for 3D rotation (farther camera = less perspective distortion)
         float scale = getResources().getDisplayMetrics().density;
@@ -93,36 +107,82 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupDatabase() {
         dbHelper = DatabaseHelper.getInstance(this);
-        networkManager = new NetworkDataManager(this); // 👈 Initialize network manager
+        firebaseManager = new FirebaseDataManager(this);
 
-        // Always fetch data from GitHub on startup (no local data)
-        fetchNewDataFromGitHub();
+        // Show sync status to user
+        Toast.makeText(this, "🔥 Synchronisiere mit Firebase...", Toast.LENGTH_SHORT).show();
+        
+        // Always fetch data from Firebase on startup
+        fetchNewDataFromFirebase();
     }
 
-    // 👈 Updated method to fetch both messages and timeline events
-    private void fetchNewDataFromGitHub() {
-        Log.d("MainActivity", "Attempting to fetch new data from GitHub Pages...");
+    // 👈 Updated method to fetch both messages and timeline events from Firebase
+    private void fetchNewDataFromFirebase() {
+        Log.d("MainActivity", "Attempting to fetch new data from Firebase...");
+
+        // Add timeout for Firebase operations
+        android.os.Handler timeoutHandler = new android.os.Handler();
+        final boolean[] syncCompleted = {false};
+        
+        // Set timeout of 10 seconds
+        timeoutHandler.postDelayed(() -> {
+            if (!syncCompleted[0]) {
+                Log.w("MainActivity", "Firebase sync timeout - using local data");
+                Toast.makeText(MainActivity.this, "⚠️ Sync timeout - lokale Daten werden verwendet", Toast.LENGTH_SHORT).show();
+                loadTodaysMessage();
+                syncCompleted[0] = true;
+            }
+        }, 10000);
 
         // Fetch messages
-        networkManager.fetchAndUpdateMessages(new NetworkDataManager.DataUpdateCallback() {
+        firebaseManager.fetchAndUpdateMessages(new FirebaseDataManager.DataUpdateCallback() {
             @Override
             public void onSuccess(int newMessagesCount) {
-                if (newMessagesCount > 0) {
-                    Log.d("MainActivity", "Successfully added " + newMessagesCount + " new messages");
-                    Toast.makeText(MainActivity.this,
-                            "❤️ " + newMessagesCount + " neue Nachrichten hinzugefügt!",
-                            Toast.LENGTH_SHORT).show();
+                if (!syncCompleted[0]) {
+                    syncCompleted[0] = true;
+                    timeoutHandler.removeCallbacksAndMessages(null);
+                    
+                    // Reset sync button
+                    if (syncButtonMain != null) {
+                        syncButtonMain.setEnabled(true);
+                        syncButtonMain.setText("🔄 Aktualisieren");
+                    }
+                    
+                    if (newMessagesCount > 0) {
+                        Log.d("MainActivity", "Successfully added " + newMessagesCount + " new messages");
+                        Toast.makeText(MainActivity.this,
+                                "❤️ " + newMessagesCount + " neue Nachrichten hinzugefügt!",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "✅ Nachrichten sind aktuell", Toast.LENGTH_SHORT).show();
+                    }
+                    // Reload today's message after successful sync
+                    loadTodaysMessage();
                 }
             }
 
             @Override
             public void onError(String error) {
-                Log.e("MainActivity", "Failed to fetch messages: " + error);
+                if (!syncCompleted[0]) {
+                    syncCompleted[0] = true;
+                    timeoutHandler.removeCallbacksAndMessages(null);
+                    
+                    // Reset sync button
+                    if (syncButtonMain != null) {
+                        syncButtonMain.setEnabled(true);
+                        syncButtonMain.setText("🔄 Aktualisieren");
+                    }
+                    
+                    Log.e("MainActivity", "Failed to fetch messages: " + error);
+                    Toast.makeText(MainActivity.this, "❌ Firebase Sync fehlgeschlagen: " + error, Toast.LENGTH_SHORT).show();
+                    // Still try to load today's message from local data
+                    loadTodaysMessage();
+                }
             }
         });
 
         // Fetch timeline events
-        networkManager.fetchAndUpdateTimeline(new NetworkDataManager.DataUpdateCallback() {
+        firebaseManager.fetchAndUpdateTimeline(new FirebaseDataManager.DataUpdateCallback() {
             @Override
             public void onSuccess(int newEventsCount) {
                 if (newEventsCount > 0) {
@@ -260,55 +320,55 @@ public class MainActivity extends AppCompatActivity {
         
         switch (messageType) {
             case "love_note":
-                backgroundColor = getResources().getColor(R.color.love_note_bg);
-                textColor = getResources().getColor(R.color.love_note_text);
-                strokeColor = getResources().getColor(R.color.love_note_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.love_note_bg);
+                textColor = ContextCompat.getColor(this, R.color.love_note_text);
+                strokeColor = ContextCompat.getColor(this, R.color.love_note_text);
                 break;
             case "memory":
-                backgroundColor = getResources().getColor(R.color.memory_bg);
-                textColor = getResources().getColor(R.color.memory_text);
-                strokeColor = getResources().getColor(R.color.memory_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.memory_bg);
+                textColor = ContextCompat.getColor(this, R.color.memory_text);
+                strokeColor = ContextCompat.getColor(this, R.color.memory_text);
                 break;
             case "appreciation":
-                backgroundColor = getResources().getColor(R.color.appreciation_bg);
-                textColor = getResources().getColor(R.color.appreciation_text);
-                strokeColor = getResources().getColor(R.color.appreciation_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.appreciation_bg);
+                textColor = ContextCompat.getColor(this, R.color.appreciation_text);
+                strokeColor = ContextCompat.getColor(this, R.color.appreciation_text);
                 break;
             case "inside_joke":
-                backgroundColor = getResources().getColor(R.color.inside_joke_bg);
-                textColor = getResources().getColor(R.color.inside_joke_text);
-                strokeColor = getResources().getColor(R.color.inside_joke_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.inside_joke_bg);
+                textColor = ContextCompat.getColor(this, R.color.inside_joke_text);
+                strokeColor = ContextCompat.getColor(this, R.color.inside_joke_text);
                 break;
             case "future_dream":
-                backgroundColor = getResources().getColor(R.color.future_dream_bg);
-                textColor = getResources().getColor(R.color.future_dream_text);
-                strokeColor = getResources().getColor(R.color.future_dream_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.future_dream_bg);
+                textColor = ContextCompat.getColor(this, R.color.future_dream_text);
+                strokeColor = ContextCompat.getColor(this, R.color.future_dream_text);
                 break;
             case "gratitude":
-                backgroundColor = getResources().getColor(R.color.gratitude_bg);
-                textColor = getResources().getColor(R.color.gratitude_text);
-                strokeColor = getResources().getColor(R.color.gratitude_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.gratitude_bg);
+                textColor = ContextCompat.getColor(this, R.color.gratitude_text);
+                strokeColor = ContextCompat.getColor(this, R.color.gratitude_text);
                 break;
             case "encouragement":
-                backgroundColor = getResources().getColor(R.color.encouragement_bg);
-                textColor = getResources().getColor(R.color.encouragement_text);
-                strokeColor = getResources().getColor(R.color.encouragement_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.encouragement_bg);
+                textColor = ContextCompat.getColor(this, R.color.encouragement_text);
+                strokeColor = ContextCompat.getColor(this, R.color.encouragement_text);
                 break;
             case "seasonal":
-                backgroundColor = getResources().getColor(R.color.seasonal_bg);
-                textColor = getResources().getColor(R.color.seasonal_text);
-                strokeColor = getResources().getColor(R.color.seasonal_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.seasonal_bg);
+                textColor = ContextCompat.getColor(this, R.color.seasonal_text);
+                strokeColor = ContextCompat.getColor(this, R.color.seasonal_text);
                 break;
             case "sweet":
-                backgroundColor = getResources().getColor(R.color.sweet_bg);
-                textColor = getResources().getColor(R.color.sweet_text);
-                strokeColor = getResources().getColor(R.color.sweet_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.sweet_bg);
+                textColor = ContextCompat.getColor(this, R.color.sweet_text);
+                strokeColor = ContextCompat.getColor(this, R.color.sweet_text);
                 break;
             default:
                 // Default to love_note theme
-                backgroundColor = getResources().getColor(R.color.love_note_bg);
-                textColor = getResources().getColor(R.color.love_note_text);
-                strokeColor = getResources().getColor(R.color.love_note_text);
+                backgroundColor = ContextCompat.getColor(this, R.color.love_note_bg);
+                textColor = ContextCompat.getColor(this, R.color.love_note_text);
+                strokeColor = ContextCompat.getColor(this, R.color.love_note_text);
                 break;
         }
         
@@ -349,6 +409,11 @@ public class MainActivity extends AppCompatActivity {
             
             flipOut.start();
             isShowingFront = false;
+            
+            // Mark message as viewed when revealing it
+            if (notificationHelper != null) {
+                notificationHelper.markMessageViewed(this);
+            }
         } else {
             // Flip to front (hide message)
             AnimatorSet flipOut = (AnimatorSet) AnimatorInflater.loadAnimator(this, R.animator.card_flip_left_out);
@@ -372,6 +437,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void manualSync() {
+        syncButtonMain.setEnabled(false);
+        syncButtonMain.setText("🔄 Synchronisiere...");
+        
+        Toast.makeText(this, "🔄 Aktualisiere Daten...", Toast.LENGTH_SHORT).show();
+        
+        // Manual sync - same logic as automatic sync but with user feedback
+        fetchNewDataFromFirebase();
+        
+        // Re-enable button after delay (Firebase callbacks will also handle this)
+        new android.os.Handler().postDelayed(() -> {
+            if (syncButtonMain != null) {
+                syncButtonMain.setEnabled(true);
+                syncButtonMain.setText("🔄 Aktualisieren");
+            }
+        }, 3000);
+    }
+
     private void openTimeline() {
         Intent intent = new Intent(this, TimelineActivity.class);
         startActivity(intent);
@@ -389,26 +472,51 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
     }
-
-    private void triggerTestNotification() {
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "LOVE_MESSAGES")
-                .setSmallIcon(R.drawable.ic_notification_heart) // ❤️ Heart icon
-                .setContentTitle("Test ❤️")
-                .setContentText("Deine erste Notification ist da!")
-                .setPriority(NotificationCompat.PRIORITY_HIGH) // hoch setzen, damit sichtbar
-                .setAutoCancel(false); // verschwindet nach Klick
-
-        notificationManager.notify(1, builder.build());
+    
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) 
+                != PackageManager.PERMISSION_GRANTED) {
+                
+                // Show rationale if needed
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, 
+                    android.Manifest.permission.POST_NOTIFICATIONS)) {
+                    
+                    // Show explanation to user
+                    Toast.makeText(this, 
+                        "Benachrichtigungen sind nötig für deine täglichen Liebesnachrichten ❤️", 
+                        Toast.LENGTH_LONG).show();
+                }
+                
+                // Request permission
+                ActivityCompat.requestPermissions(this, 
+                    new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 
+                    NOTIFICATION_PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Perfekt! Du bekommst jetzt deine täglichen Liebesnachrichten 💕", 
+                    Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Schade! Du verpasst deine täglichen Liebesnachrichten. Du kannst die Berechtigung in den Einstellungen aktivieren ❤️", 
+                    Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     // 👈 Add cleanup when activity is destroyed
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (networkManager != null) {
-            networkManager.shutdown();
+        if (firebaseManager != null) {
+            firebaseManager.shutdown();
         }
     }
 }

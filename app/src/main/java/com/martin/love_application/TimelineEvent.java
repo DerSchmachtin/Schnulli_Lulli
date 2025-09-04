@@ -18,6 +18,15 @@ public class TimelineEvent {
         this.photos = photos;
         this.type = type;
     }
+    
+    // Constructor for Firebase compatibility
+    public TimelineEvent(String title, String date, String type) {
+        this.title = title;
+        this.date = date;
+        this.type = type;
+        this.description = "";
+        this.photos = "";
+    }
 
     // Getters and Setters
     public int getId() {

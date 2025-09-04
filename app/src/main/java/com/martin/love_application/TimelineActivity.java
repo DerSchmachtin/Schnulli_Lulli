@@ -22,7 +22,7 @@ public class TimelineActivity extends AppCompatActivity {
     private MaterialButton syncButton;
 
     private DatabaseHelper dbHelper;
-    private NetworkDataManager networkManager;
+    private FirebaseDataManager firebaseManager;
     private List<TimelineEvent> timelineEvents;
 
 
@@ -50,7 +50,7 @@ public class TimelineActivity extends AppCompatActivity {
 
     private void setupDatabase() {
         dbHelper = DatabaseHelper.getInstance(this);
-        networkManager = new NetworkDataManager(this);
+        firebaseManager = new FirebaseDataManager(this);
     }
 
     private void loadTimelineEvents() {
@@ -73,7 +73,7 @@ public class TimelineActivity extends AppCompatActivity {
         
         Toast.makeText(this, "Synchronisiere Timeline...", Toast.LENGTH_SHORT).show();
         
-        networkManager.fetchAndUpdateTimeline(new NetworkDataManager.DataUpdateCallback() {
+        firebaseManager.fetchAndUpdateTimeline(new FirebaseDataManager.DataUpdateCallback() {
             @Override
             public void onSuccess(int newEventsCount) {
                 syncButton.setEnabled(true);
@@ -106,11 +106,6 @@ public class TimelineActivity extends AppCompatActivity {
                 
                 Log.e("TimelineActivity", "Sync error: " + error);
             }
-
-            @Override
-            public void onStarted() {
-                // Already handled above
-            }
         });
     }
 
@@ -127,8 +122,8 @@ public class TimelineActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (networkManager != null) {
-            networkManager.shutdown();
+        if (firebaseManager != null) {
+            firebaseManager.shutdown();
         }
     }
 }
