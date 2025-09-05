@@ -25,13 +25,11 @@ public class TimelineActivity extends AppCompatActivity {
     private RecyclerView timelineRecyclerView;
     private TimelineAdapter timelineAdapter;
     private MaterialToolbar toolbar;
-    private MaterialButton syncButton;
     private FloatingActionButton fabAddEvent;
     private TextView totalMemories;
     private TextView daysTogether;
 
     private DatabaseHelper dbHelper;
-    private FirebaseDataManager firebaseManager;
     private List<TimelineEvent> timelineEvents;
     
     // Your relationship start date - should match MainActivity
@@ -54,7 +52,6 @@ public class TimelineActivity extends AppCompatActivity {
         // Initialize views
         timelineRecyclerView = findViewById(R.id.timeline_recycler_view);
         toolbar = findViewById(R.id.toolbar);
-        syncButton = findViewById(R.id.sync_button);
         fabAddEvent = findViewById(R.id.fab_add_event);
         totalMemories = findViewById(R.id.total_memories);
         daysTogether = findViewById(R.id.days_together);
@@ -64,7 +61,6 @@ public class TimelineActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         // Set click listeners
-        syncButton.setOnClickListener(v -> syncTimeline());
         fabAddEvent.setOnClickListener(v -> openAddEventActivity());
         
         // Update header stats
@@ -73,7 +69,6 @@ public class TimelineActivity extends AppCompatActivity {
 
     private void setupDatabase() {
         dbHelper = DatabaseHelper.getInstance(this);
-        firebaseManager = new FirebaseDataManager(this);
     }
 
     private void loadTimelineEvents() {
@@ -91,69 +86,6 @@ public class TimelineActivity extends AppCompatActivity {
         timelineRecyclerView.addItemDecoration(new SpacingItemDecoration(spacingInPixels));
     }
 
-    private void syncTimeline() {
-        syncButton.setEnabled(false);
-        syncButton.setText("🔄 Syncing...");
-        
-        Toast.makeText(this, "Synchronisiere Timeline...", Toast.LENGTH_SHORT).show();
-        
-        // First test Firebase connection
-        firebaseManager.testFirebaseConnection(new FirebaseDataManager.DataUpdateCallback() {
-            @Override
-            public void onSuccess(int eventCount) {
-                Log.d("TimelineActivity", "Firebase connection test successful - " + eventCount + " events found");
-                Toast.makeText(TimelineActivity.this, "✅ Firebase verbunden - " + eventCount + " Events gefunden", Toast.LENGTH_SHORT).show();
-                
-                // Now perform actual sync
-                performActualSync();
-            }
-
-            @Override
-            public void onError(String error) {
-                syncButton.setEnabled(true);
-                syncButton.setText("🔄 Sync");
-                
-                Log.e("TimelineActivity", "Firebase connection test failed: " + error);
-                Toast.makeText(TimelineActivity.this, "❌ Firebase Test fehlgeschlagen: " + error, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-    
-    private void performActualSync() {
-        
-        firebaseManager.fetchAndUpdateTimeline(new FirebaseDataManager.DataUpdateCallback() {
-            @Override
-            public void onSuccess(int newEventsCount) {
-                syncButton.setEnabled(true);
-                syncButton.setText("🔄 Sync");
-                
-                // Always refresh UI after sync to show current Firebase data
-                loadTimelineEvents();
-                if (timelineAdapter != null) {
-                    timelineAdapter.updateEvents(timelineEvents);
-                }
-                updateHeaderStats();
-                
-                Toast.makeText(TimelineActivity.this, 
-                    "✅ Firebase Sync erfolgreich: " + timelineEvents.size() + " Events geladen", 
-                    Toast.LENGTH_LONG).show();
-                
-                Log.d("TimelineActivity", "Sync successful - local database now has " + timelineEvents.size() + " events");
-            }
-
-            @Override
-            public void onError(String error) {
-                syncButton.setEnabled(true);
-                syncButton.setText("🔄 Sync");
-                
-                Toast.makeText(TimelineActivity.this, 
-                    "❌ Sync Fehler: " + error, 
-                    Toast.LENGTH_LONG).show();
-                
-                Log.e("TimelineActivity", "Sync error: " + error);
-            }
-        });
-    }
 
     private void updateHeaderStats() {
         // Update total memories count
@@ -201,11 +133,4 @@ public class TimelineActivity extends AppCompatActivity {
         updateHeaderStats();
     }
     
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (firebaseManager != null) {
-            firebaseManager.shutdown();
-        }
-    }
 }

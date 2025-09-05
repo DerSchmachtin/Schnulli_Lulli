@@ -109,11 +109,11 @@ public class MainActivity extends AppCompatActivity {
         dbHelper = DatabaseHelper.getInstance(this);
         firebaseManager = new FirebaseDataManager(this);
 
-        // Show sync status to user
-        Toast.makeText(this, "🔥 Synchronisiere mit Firebase...", Toast.LENGTH_SHORT).show();
+        // NO automatic sync on startup - only manual sync and daily sync
+        Log.d("MainActivity", "App started - no automatic sync, waiting for manual sync or daily sync");
         
-        // Always fetch data from Firebase on startup
-        fetchNewDataFromFirebase();
+        // Check if daily sync is needed
+        checkAndPerformDailySync();
     }
 
     // 👈 Updated method to fetch both messages and timeline events from Firebase
@@ -442,14 +442,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void checkAndPerformDailySync() {
+        // Check if we need daily sync (once per day)
+        long lastSyncTime = getSharedPreferences("love_app_prefs", MODE_PRIVATE)
+            .getLong("last_sync_time", 0);
+        long currentTime = System.currentTimeMillis();
+        long oneDayInMillis = 24 * 60 * 60 * 1000;
+        
+        if (currentTime - lastSyncTime > oneDayInMillis) {
+            Log.d("MainActivity", "📅 Daily sync needed - performing automatic sync");
+            Toast.makeText(this, "📅 Tägliche Synchronisation...", Toast.LENGTH_SHORT).show();
+            performSyncAndSaveTime();
+        } else {
+            Log.d("MainActivity", "✅ Daily sync not needed yet - last sync was recent");
+            // Just load today's message from local data
+            loadTodaysMessage();
+        }
+    }
+    
     private void manualSync() {
         syncButtonMain.setEnabled(false);
         syncButtonMain.setText("🔄 Synchronisiere...");
         
-        Toast.makeText(this, "🔄 Aktualisiere Daten...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "🔄 Manuelle Synchronisation...", Toast.LENGTH_SHORT).show();
         
-        // Manual sync - same logic as automatic sync but with user feedback
+        // Manual sync - perform sync and save time
+        performSyncAndSaveTime();
+    }
+    
+    private void performSyncAndSaveTime() {
+        // Perform the actual Firebase sync
         fetchNewDataFromFirebase();
+        
+        // Save sync time
+        getSharedPreferences("love_app_prefs", MODE_PRIVATE)
+            .edit()
+            .putLong("last_sync_time", System.currentTimeMillis())
+            .apply();
+        
+        Log.d("MainActivity", "💾 Sync time saved");
         
         // Re-enable button after delay (Firebase callbacks will also handle this)
         new android.os.Handler().postDelayed(() -> {
