@@ -1,71 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/timeline_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:padding="30dp"
-    android:paddingHorizontal="24dp"
-    android:paddingVertical="50dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="6dp">
+    android:layout_marginBottom="20dp">
 
-    <LinearLayout
+    <!-- Timeline line connector -->
+    <View
+        android:id="@+id/timeline_line"
+        android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="32dp"
+        android:background="@color/timeline_line_color"
+        android:alpha="0.3"/>
+
+    <!-- Timeline circle indicator -->
+    <View
+        android:id="@+id/timeline_circle"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/timeline_circle"
+        android:elevation="2dp"/>
+
+    <!-- Event card with modern design -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/timeline_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="3dp"
+        app:strokeWidth="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardBackgroundColor="@android:color/white">
 
-        <!-- Event Icon -->
-        <ImageView
-            android:id="@+id/event_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="12dp"
-            android:contentDescription="Event Icon"
-            android:src="@drawable/ic_heart"/>
-
-        <!-- Vertical container for text -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="20dp">
 
+            <!-- Header with icon and date -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <!-- Event type icon with colored background -->
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/icon_circle_background">
+
+                    <ImageView
+                        android:id="@+id/event_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_heart"
+                        android:contentDescription="Event Icon"
+                        app:tint="@android:color/white"/>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/event_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="5. September 2024"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:textColor="@color/timeline_date_color"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/event_time_ago"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="vor 3 Tagen"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                        android:textColor="@color/timeline_secondary_text"
+                        android:layout_marginTop="2dp"/>
+                </LinearLayout>
+
+                <!-- Event type badge -->
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/event_type_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Erinnerung"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:textColor="@android:color/white"
+                    app:chipBackgroundColor="@color/chip_memory_color"
+                    app:chipCornerRadius="12dp"
+                    app:chipMinHeight="24dp"
+                    app:chipStartPadding="8dp"
+                    app:chipEndPadding="8dp"
+                    app:textStartPadding="4dp"
+                    app:textEndPadding="4dp"/>
+
+            </LinearLayout>
+
+            <!-- Event title -->
             <TextView
                 android:id="@+id/event_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Event Title"
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-                android:textStyle="bold"/>
+                android:text="Unser erstes Date ❤️"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
+                android:textColor="@color/timeline_title_color"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
 
-            <TextView
-                android:id="@+id/event_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="September 01, 2025"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="?android:attr/textColorSecondary"/>
-
+            <!-- Event description -->
             <TextView
                 android:id="@+id/event_description"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Event description goes here"
+                android:text="Das war der schönste Tag in meinem Leben. Ich werde nie vergessen..."
                 android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
+                android:textColor="@color/timeline_description_color"
+                android:lineSpacingMultiplier="1.2"
+                android:layout_marginBottom="12dp"/>
 
-        <!-- Expand/Collapse Indicator -->
-        <TextView
-            android:id="@+id/expand_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="▼"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:layout_marginStart="8dp"
-            android:visibility="gone"/>
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+            <!-- Action buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="end">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_share"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Teilen"
+                    android:textSize="12sp"
+                    android:minHeight="32dp"
+                    android:layout_marginEnd="8dp"
+                    app:icon="@drawable/ic_share"
+                    app:iconSize="16dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_favorite"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="♡"
+                    android:textSize="16sp"
+                    android:minHeight="32dp"
+                    android:minWidth="40dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</RelativeLayout>
