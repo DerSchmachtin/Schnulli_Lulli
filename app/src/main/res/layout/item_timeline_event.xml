@@ -32,16 +32,33 @@
                 android:textColor="#666"
                 android:layout_marginBottom="4dp"/>
 
-            <!-- Title -->
-            <TextView
-                android:id="@+id/event_title"
+            <!-- Title with icon -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Unser erstes Date ❤️"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"
-                android:layout_marginBottom="4dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <ImageView
+                    android:id="@+id/event_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_heart"
+                    android:contentDescription="Event Type Icon"/>
+
+                <TextView
+                    android:id="@+id/event_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Unser erstes Date ❤️"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
+
+            </LinearLayout>
 
             <!-- Description -->
             <TextView

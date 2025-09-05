@@ -1,9 +1,12 @@
 package com.martin.love_application;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,6 +47,25 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
         // Format and set date
         String formattedDate = formatDate(event.getDate());
         holder.dateText.setText(formattedDate);
+        int iconResource;
+        switch (event.getType()) {
+            case "milestone":
+                iconResource = R.drawable.ic_heart;
+                break;
+            case "holiday":
+                iconResource = R.drawable.ic_star;
+                break;
+            case "seasonal":
+                iconResource = R.drawable.ic_smile;
+                break;
+            case "memory":
+                iconResource = R.drawable.ic_cloud;
+                break;
+            default:
+                iconResource = R.drawable.ic_star;
+                break;
+        }
+        holder.eventIcon.setImageResource(iconResource);
     }
 
     @Override
@@ -73,6 +95,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
         TextView titleText;
         TextView dateText;
         TextView descriptionText;
+        ImageView eventIcon;
 
         public TimelineViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -80,6 +103,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             titleText = itemView.findViewById(R.id.event_title);
             dateText = itemView.findViewById(R.id.event_date);
             descriptionText = itemView.findViewById(R.id.event_description);
+            eventIcon = itemView.findViewById((R.id.event_icon));
         }
     }
 }

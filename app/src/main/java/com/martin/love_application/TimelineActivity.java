@@ -25,7 +25,6 @@ public class TimelineActivity extends AppCompatActivity {
     private RecyclerView timelineRecyclerView;
     private TimelineAdapter timelineAdapter;
     private MaterialToolbar toolbar;
-    private FloatingActionButton fabAddEvent;
     private TextView totalMemories;
     private TextView daysTogether;
 
@@ -52,16 +51,12 @@ public class TimelineActivity extends AppCompatActivity {
         // Initialize views
         timelineRecyclerView = findViewById(R.id.timeline_recycler_view);
         toolbar = findViewById(R.id.toolbar);
-        fabAddEvent = findViewById(R.id.fab_add_event);
         totalMemories = findViewById(R.id.total_memories);
         daysTogether = findViewById(R.id.days_together);
 
         // Setup toolbar
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
-
-        // Set click listeners
-        fabAddEvent.setOnClickListener(v -> openAddEventActivity());
         
         // Update header stats
         updateHeaderStats();
@@ -117,10 +112,6 @@ public class TimelineActivity extends AppCompatActivity {
         return 0;
     }
     
-    private void openAddEventActivity() {
-        Intent intent = new Intent(this, AddTimelineEventActivity.class);
-        startActivity(intent);
-    }
 
     @Override
     protected void onResume() {
