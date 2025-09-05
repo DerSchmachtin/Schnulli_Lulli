@@ -67,13 +67,13 @@ public class MainActivity extends AppCompatActivity {
         
         // Initialize Firebase explicitly
         FirebaseApp.initializeApp(this);
-        
         setContentView(R.layout.activity_main);
 
         initializeViews();
         setupDatabase();
         checkNotificationPermission();
         setupNotifications();
+
         updateUI();
     }
 
@@ -148,18 +148,17 @@ public class MainActivity extends AppCompatActivity {
                         syncButtonMain.setText("🔄 Aktualisieren");
                     }
                     
-                    // Always reload today's message after sync to show current Firebase data
+                    // Always reload today's message after sync
                     loadTodaysMessage();
                     
                     if (newMessagesCount > 0) {
-                        Log.d("MainActivity", "Successfully synced " + newMessagesCount + " messages");
+                        Log.d("MainActivity", "✅ Firebase Messages sync erfolgreich - " + newMessagesCount + " Messages von Firebase geladen");
                         Toast.makeText(MainActivity.this,
-                                "✅ Nachrichten aktualisiert: " + newMessagesCount + " Nachrichten geladen",
+                                "✅ Firebase Sync: " + newMessagesCount + " Messages geladen",
                                 Toast.LENGTH_SHORT).show();
                     } else {
-                        Message currentMessage = dbHelper.getTodaysMessage();
-                        String messageInfo = currentMessage != null ? "Nachricht für heute geladen" : "Keine Nachricht für heute";
-                        Toast.makeText(MainActivity.this, "✅ " + messageInfo, Toast.LENGTH_SHORT).show();
+                        Log.d("MainActivity", "Keine Messages in Firebase gefunden");
+                        Toast.makeText(MainActivity.this, "ℹ️ Keine Messages in Firebase gefunden", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -176,8 +175,8 @@ public class MainActivity extends AppCompatActivity {
                         syncButtonMain.setText("🔄 Aktualisieren");
                     }
                     
-                    Log.e("MainActivity", "Failed to fetch messages: " + error);
-                    Toast.makeText(MainActivity.this, "❌ Firebase Sync fehlgeschlagen: " + error, Toast.LENGTH_SHORT).show();
+                    Log.e("MainActivity", "❌ Firebase Messages sync fehlgeschlagen: " + error);
+                    Toast.makeText(MainActivity.this, "❌ Firebase Messages Sync fehlgeschlagen: " + error, Toast.LENGTH_LONG).show();
                     // Still try to load today's message from local data
                     loadTodaysMessage();
                 }
@@ -189,16 +188,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int newEventsCount) {
                 if (newEventsCount > 0) {
-                    Log.d("MainActivity", "Successfully added " + newEventsCount + " new timeline events");
+                    Log.d("MainActivity", "✅ Firebase Timeline sync erfolgreich - " + newEventsCount + " Events von Firebase geladen");
                     Toast.makeText(MainActivity.this,
-                            "❤️ " + newEventsCount + " neue Timeline-Events hinzugefügt!",
+                            "✅ Firebase Sync: " + newEventsCount + " Timeline-Events geladen",
                             Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.d("MainActivity", "Keine Timeline Events in Firebase gefunden");
                 }
             }
 
             @Override
             public void onError(String error) {
-                Log.e("MainActivity", "Failed to fetch timeline events: " + error);
+                Log.e("MainActivity", "❌ Firebase Timeline sync fehlgeschlagen: " + error);
             }
         });
     }

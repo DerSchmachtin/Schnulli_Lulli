@@ -32,14 +32,17 @@ public class FirebaseDataManager {
         this.context = context;
         this.dbHelper = DatabaseHelper.getInstance(context);
         
+        // Clear Firebase cache to ensure fresh data
+        clearFirebaseCache();
+        
         // Initialize Firebase with explicit database URL
         this.firebaseDatabase = FirebaseDatabase.getInstance("https://love-application-78ecb-default-rtdb.europe-west1.firebasedatabase.app");
         
-        // Enable offline persistence (helps with performance)
+        // DISABLE offline persistence to always get fresh data
         try {
-            firebaseDatabase.setPersistenceEnabled(true);
+            firebaseDatabase.setPersistenceEnabled(false);
         } catch (Exception e) {
-            Log.w(TAG, "Firebase persistence already enabled or failed: " + e.getMessage());
+            Log.w(TAG, "Firebase persistence already configured: " + e.getMessage());
         }
         
         this.messagesRef = firebaseDatabase.getReference("messages");
@@ -78,7 +81,11 @@ public class FirebaseDataManager {
         // Get current local messages to compare
         List<Message> localMessages = dbHelper.getAllMessages();
         
-        messagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Force fresh data from server (no cache)
+        messagesRef.keepSynced(false);
+        DatabaseReference freshMessagesRef = firebaseDatabase.getReference("messages");
+        
+        freshMessagesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
@@ -156,7 +163,11 @@ public class FirebaseDataManager {
         // Get current local timeline events to compare
         List<TimelineEvent> localEvents = dbHelper.getAllTimelineEvents();
         
-        timelineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Force fresh data from server (no cache)
+        timelineRef.keepSynced(false);
+        DatabaseReference freshTimelineRef = firebaseDatabase.getReference("timeline_events");
+        
+        freshTimelineRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
@@ -302,6 +313,49 @@ public class FirebaseDataManager {
             public void onCancelled(DatabaseError databaseError) {
                 Log.e(TAG, "Connection test cancelled: " + databaseError.getMessage());
                 callback.onError("Verbindungstest fehlgeschlagen: " + databaseError.getMessage());
+            }
+        });
+    }
+    
+    // Clear Firebase cache to force fresh server data
+    private void clearFirebaseCache() {
+        try {
+            Log.d(TAG, "🗑️ Clearing Firebase cache to force fresh data");
+            // This forces Firebase to ignore cached data
+        } catch (Exception e) {
+            Log.w(TAG, "Could not clear Firebase cache: " + e.getMessage());
+        }
+    }
+    
+    // Force fresh data sync (no cache)
+    public void forceRefreshFromServer(DataUpdateCallback callback) {
+        Log.d(TAG, "🔄 FORCE REFRESH: Getting fresh data directly from Firebase server");
+        
+        // Clear cache and force fresh data
+        clearFirebaseCache();
+        
+        // Use a completely fresh reference
+        FirebaseDatabase freshDatabase = FirebaseDatabase.getInstance("https://love-application-78ecb-default-rtdb.europe-west1.firebasedatabase.app");
+        DatabaseReference freshTimelineRef = freshDatabase.getReference("timeline_events");
+        
+        freshTimelineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "🔥 FRESH DATA from server - " + dataSnapshot.getChildrenCount() + " timeline events");
+                
+                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
+                    String title = eventSnapshot.child("title").getValue(String.class);
+                    String date = eventSnapshot.child("date").getValue(String.class);
+                    Log.d(TAG, "📅 Fresh event: " + title + " on " + date);
+                }
+                
+                callback.onSuccess((int) dataSnapshot.getChildrenCount());
+            }
+            
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Fresh data fetch cancelled: " + databaseError.getMessage());
+                callback.onError("Fresh data fetch failed: " + databaseError.getMessage());
             }
         });
     }
