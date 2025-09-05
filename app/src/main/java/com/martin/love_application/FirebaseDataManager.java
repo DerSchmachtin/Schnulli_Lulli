@@ -101,31 +101,27 @@ public class FirebaseDataManager {
                         }
                     }
                     
-                    // Compare with local data
-                    boolean dataChanged = !messagesAreEqual(localMessages, firebaseMessages);
-                    
-                    if (dataChanged || firebaseMessages.size() != localMessages.size()) {
-                        // Clear all local messages and replace with Firebase data
+                    if (firebaseMessages.size() > 0) {
+                        // Firebase hat Messages gefunden → Alle alten löschen, neue einfügen
+                        Log.d(TAG, "Firebase Messages gefunden → Lösche alle alten Messages und füge " + firebaseMessages.size() + " neue hinzu");
                         dbHelper.clearAllMessages();
                         
-                        // Add all Firebase messages to local database
+                        int addedCount = 0;
                         for (Message message : firebaseMessages) {
                             boolean added = dbHelper.addMessage(message);
-                            if (!added) {
-                                Log.e(TAG, "Failed to add message to local database: " + message.getText());
-                            } else {
-                                Log.d(TAG, "Successfully added message: " + message.getText());
+                            if (added) {
+                                addedCount++;
                             }
                         }
                         
                         long endTime = System.currentTimeMillis();
-                        Log.d(TAG, "Messages synchronized - " + firebaseMessages.size() + " total messages in " + (endTime - startTime) + "ms");
-                        callback.onSuccess(firebaseMessages.size());
+                        Log.d(TAG, "✅ Messages sync erfolgreich - " + addedCount + " Messages von Firebase geladen in " + (endTime - startTime) + "ms");
+                        callback.onSuccess(addedCount);
                     } else {
-                        // No changes
+                        // Keine Messages in Firebase
+                        Log.d(TAG, "Keine Messages in Firebase gefunden - lokale Daten bleiben unverändert");
                         long endTime = System.currentTimeMillis();
-                        Log.d(TAG, "Messages are already up to date - " + firebaseMessages.size() + " messages in " + (endTime - startTime) + "ms");
-                        callback.onSuccess(0); // 0 indicates no changes
+                        callback.onSuccess(0);
                     }
                     
                 } catch (Exception e) {
@@ -153,6 +149,8 @@ public class FirebaseDataManager {
         }
         
         Log.d(TAG, "Syncing timeline events from Firebase...");
+        Log.d(TAG, "Firebase database URL: " + firebaseDatabase.getReference().toString());
+        Log.d(TAG, "Timeline reference path: " + timelineRef.toString());
         long startTime = System.currentTimeMillis();
         
         // Get current local timeline events to compare
@@ -163,6 +161,8 @@ public class FirebaseDataManager {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
                     List<TimelineEvent> firebaseEvents = new ArrayList<>();
+                    
+                    Log.d(TAG, "Firebase timeline node has " + dataSnapshot.getChildrenCount() + " children");
                     
                     // Get all events from Firebase
                     for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
@@ -177,29 +177,33 @@ public class FirebaseDataManager {
                                 event.setDescription(description);
                             }
                             firebaseEvents.add(event);
+                            Log.d(TAG, "Firebase timeline event loaded: " + title + " (date: " + date + ", type: " + type + ")");
+                        } else {
+                            Log.w(TAG, "Incomplete timeline event data - title: " + title + ", date: " + date + ", type: " + type);
                         }
                     }
                     
-                    // Compare with local data
-                    boolean dataChanged = !timelineEventsAreEqual(localEvents, firebaseEvents);
-                    
-                    if (dataChanged || firebaseEvents.size() != localEvents.size()) {
-                        // Clear all local timeline events and replace with Firebase data
+                    if (firebaseEvents.size() > 0) {
+                        // Firebase hat Events gefunden → Alle alten löschen, neue einfügen
+                        Log.d(TAG, "Firebase Events gefunden → Lösche alle alten Events und füge " + firebaseEvents.size() + " neue hinzu");
                         dbHelper.clearAllTimelineEvents();
                         
-                        // Add all Firebase events to local database
+                        int addedCount = 0;
                         for (TimelineEvent event : firebaseEvents) {
-                            dbHelper.addTimelineEvent(event);
+                            boolean added = dbHelper.addTimelineEvent(event);
+                            if (added) {
+                                addedCount++;
+                            }
                         }
                         
                         long endTime = System.currentTimeMillis();
-                        Log.d(TAG, "Timeline events synchronized - " + firebaseEvents.size() + " total events in " + (endTime - startTime) + "ms");
-                        callback.onSuccess(firebaseEvents.size());
+                        Log.d(TAG, "✅ Timeline sync erfolgreich - " + addedCount + " Events von Firebase geladen in " + (endTime - startTime) + "ms");
+                        callback.onSuccess(addedCount);
                     } else {
-                        // No changes
+                        // Keine Events in Firebase
+                        Log.d(TAG, "Keine Events in Firebase gefunden - lokale Daten bleiben unverändert");
                         long endTime = System.currentTimeMillis();
-                        Log.d(TAG, "Timeline events are already up to date - " + firebaseEvents.size() + " events in " + (endTime - startTime) + "ms");
-                        callback.onSuccess(0); // 0 indicates no changes
+                        callback.onSuccess(0);
                     }
                     
                 } catch (Exception e) {
@@ -247,88 +251,59 @@ public class FirebaseDataManager {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
     
-    private boolean messagesAreEqual(List<Message> local, List<Message> firebase) {
-        if (local == null && firebase == null) {
-            return true;
-        }
-        if (local == null || firebase == null) {
-            return false;
-        }
-        if (local.size() != firebase.size()) {
-            return false;
-        }
-        
-        for (Message localMsg : local) {
-            if (localMsg == null) continue;
-            
-            boolean found = false;
-            for (Message firebaseMsg : firebase) {
-                if (firebaseMsg == null) continue;
-                
-                String localText = localMsg.getText();
-                String localType = localMsg.getType();
-                String localUnlockDate = localMsg.getUnlockDate();
-                
-                String firebaseText = firebaseMsg.getText();
-                String firebaseType = firebaseMsg.getType();
-                String firebaseUnlockDate = firebaseMsg.getUnlockDate();
-                
-                if (localText != null && localText.equals(firebaseText) &&
-                    localType != null && localType.equals(firebaseType) &&
-                    localUnlockDate != null && localUnlockDate.equals(firebaseUnlockDate)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return false;
-            }
-        }
-        return true;
-    }
     
-    private boolean timelineEventsAreEqual(List<TimelineEvent> local, List<TimelineEvent> firebase) {
-        if (local == null && firebase == null) {
-            return true;
-        }
-        if (local == null || firebase == null) {
-            return false;
-        }
-        if (local.size() != firebase.size()) {
-            return false;
-        }
+    // Test Firebase connection and data structure
+    public void testFirebaseConnection(DataUpdateCallback callback) {
+        Log.d(TAG, "Testing Firebase connection and data structure...");
         
-        for (TimelineEvent localEvent : local) {
-            if (localEvent == null) continue;
-            
-            boolean found = false;
-            for (TimelineEvent firebaseEvent : firebase) {
-                if (firebaseEvent == null) continue;
+        // Test connection to root
+        firebaseDatabase.getReference(".info/connected").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                boolean connected = snapshot.getValue(Boolean.class);
+                Log.d(TAG, "Firebase connection test: " + connected);
                 
-                String localTitle = localEvent.getTitle();
-                String localDate = localEvent.getDate();
-                String localType = localEvent.getType();
-                String localDescription = localEvent.getDescription();
-                
-                String firebaseTitle = firebaseEvent.getTitle();
-                String firebaseDate = firebaseEvent.getDate();
-                String firebaseType = firebaseEvent.getType();
-                String firebaseDescription = firebaseEvent.getDescription();
-                
-                if (localTitle != null && localTitle.equals(firebaseTitle) &&
-                    localDate != null && localDate.equals(firebaseDate) &&
-                    localType != null && localType.equals(firebaseType) &&
-                    ((localDescription == null && firebaseDescription == null) ||
-                     (localDescription != null && localDescription.equals(firebaseDescription)))) {
-                    found = true;
-                    break;
+                if (connected) {
+                    // Test data structure - check if timeline_events node exists
+                    timelineRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Log.d(TAG, "Timeline node exists: " + dataSnapshot.exists());
+                            Log.d(TAG, "Timeline children count: " + dataSnapshot.getChildrenCount());
+                            
+                            if (dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
+                                Log.d(TAG, "Sample timeline data:");
+                                int count = 0;
+                                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                    if (count < 3) { // Show first 3 entries
+                                        Log.d(TAG, "Event " + count + ": " + child.getValue());
+                                        count++;
+                                    }
+                                }
+                                callback.onSuccess((int) dataSnapshot.getChildrenCount());
+                            } else {
+                                Log.w(TAG, "Timeline node is empty or doesn't exist");
+                                callback.onError("Timeline node ist leer oder existiert nicht");
+                            }
+                        }
+                        
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.e(TAG, "Timeline test cancelled: " + databaseError.getMessage());
+                            callback.onError("Timeline test fehlgeschlagen: " + databaseError.getMessage());
+                        }
+                    });
+                } else {
+                    callback.onError("Firebase Verbindung fehlgeschlagen");
                 }
             }
-            if (!found) {
-                return false;
+            
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Connection test cancelled: " + databaseError.getMessage());
+                callback.onError("Verbindungstest fehlgeschlagen: " + databaseError.getMessage());
             }
-        }
-        return true;
+        });
     }
     
     public void shutdown() {

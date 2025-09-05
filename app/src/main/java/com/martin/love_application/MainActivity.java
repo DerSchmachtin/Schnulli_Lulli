@@ -148,16 +148,19 @@ public class MainActivity extends AppCompatActivity {
                         syncButtonMain.setText("🔄 Aktualisieren");
                     }
                     
+                    // Always reload today's message after sync to show current Firebase data
+                    loadTodaysMessage();
+                    
                     if (newMessagesCount > 0) {
                         Log.d("MainActivity", "Successfully synced " + newMessagesCount + " messages");
                         Toast.makeText(MainActivity.this,
-                                "❤️ " + newMessagesCount + " Nachrichten synchronisiert!",
+                                "✅ Nachrichten aktualisiert: " + newMessagesCount + " Nachrichten geladen",
                                 Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(MainActivity.this, "✅ Keine Nachrichten in Firebase", Toast.LENGTH_SHORT).show();
+                        Message currentMessage = dbHelper.getTodaysMessage();
+                        String messageInfo = currentMessage != null ? "Nachricht für heute geladen" : "Keine Nachricht für heute";
+                        Toast.makeText(MainActivity.this, "✅ " + messageInfo, Toast.LENGTH_SHORT).show();
                     }
-                    // Reload today's message after successful sync
-                    loadTodaysMessage();
                 }
             }
 
@@ -247,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadTodaysMessage() {
         Message todaysMessage = dbHelper.getTodaysMessage();
+        Log.d("MainActivity", "Loading today's message: " + (todaysMessage != null ? "Found message: " + todaysMessage.getText() : "No message found"));
 
         if (todaysMessage != null) {
             // Display the message

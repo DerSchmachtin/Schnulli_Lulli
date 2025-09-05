@@ -17,7 +17,7 @@ import java.util.Locale;
 public class AddTimelineEventActivity extends AppCompatActivity {
 
     private TextInputEditText titleInput, dateInput, descriptionInput;
-    private MaterialButton saveButton; // 👈 Change from Button to MaterialButton
+    private MaterialButton saveButton;
     private DatabaseHelper dbHelper;
 
     @Override
@@ -65,14 +65,8 @@ public class AddTimelineEventActivity extends AppCompatActivity {
             return;
         }
 
-        long result = dbHelper.insertTimelineEvent(date, title, description, "", "user_added");
-
-        if (result > -1) {
-            Toast.makeText(this, "Event saved successfully! ✅", Toast.LENGTH_SHORT).show();
-            finish();
-        } else {
-            Toast.makeText(this, "Error saving event. ❌", Toast.LENGTH_SHORT).show();
-        }
+        // Disable local event creation - only Firebase data should be used
+        Toast.makeText(this, "❌ Local event creation disabled. Events are managed via Firebase only.", Toast.LENGTH_LONG).show();
     }
 
     private boolean isDateValid(String dateString, String format) {
@@ -85,4 +79,5 @@ public class AddTimelineEventActivity extends AppCompatActivity {
             return false;
         }
     }
+    
 }

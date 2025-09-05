@@ -208,6 +208,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Message getTodaysMessage() {
         SQLiteDatabase db = this.getReadableDatabase();
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        Log.d("DatabaseHelper", "Looking for today's message for date: " + today);
 
         Cursor cursor = db.query(TABLE_MESSAGES,
                 null,
@@ -223,6 +224,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             message.setType(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_TYPE)));
             message.setDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MESSAGE_DATE)));
             message.setUnlocked(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_UNLOCKED)) == 1);
+            Log.d("DatabaseHelper", "Found today's message: " + message.getText() + " (type: " + message.getType() + ")");
+        } else {
+            Log.d("DatabaseHelper", "No message found for today (" + today + ")");
         }
 
         cursor.close();

@@ -178,6 +178,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
 
     public void updateEvents(List<TimelineEvent> newEvents) {
         this.timelineEvents = newEvents;
+        android.util.Log.d("TimelineAdapter", "Updating events: " + (newEvents != null ? newEvents.size() : 0) + " events");
         notifyDataSetChanged();
     }
 
