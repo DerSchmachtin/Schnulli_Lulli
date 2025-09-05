@@ -71,6 +71,8 @@ public class FirebaseDataManager {
         }
         
         Log.d(TAG, "Syncing messages from Firebase...");
+        Log.d(TAG, "Firebase database URL: " + firebaseDatabase.getReference().toString());
+        Log.d(TAG, "Messages reference path: " + messagesRef.toString());
         long startTime = System.currentTimeMillis();
         
         // Get current local messages to compare
@@ -82,6 +84,8 @@ public class FirebaseDataManager {
                 try {
                     List<Message> firebaseMessages = new ArrayList<>();
                     
+                    Log.d(TAG, "Firebase messages node has " + dataSnapshot.getChildrenCount() + " children");
+                    
                     // Get all messages from Firebase
                     for (DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
                         String text = messageSnapshot.child("text").getValue(String.class);
@@ -91,6 +95,9 @@ public class FirebaseDataManager {
                         if (text != null && type != null && unlockDate != null) {
                             Message message = new Message(text, type, unlockDate);
                             firebaseMessages.add(message);
+                            Log.d(TAG, "Firebase message loaded: " + text + " (type: " + type + ", date: " + unlockDate + ")");
+                        } else {
+                            Log.w(TAG, "Incomplete message data - text: " + text + ", type: " + type + ", unlockDate: " + unlockDate);
                         }
                     }
                     
@@ -103,7 +110,12 @@ public class FirebaseDataManager {
                         
                         // Add all Firebase messages to local database
                         for (Message message : firebaseMessages) {
-                            dbHelper.addMessage(message);
+                            boolean added = dbHelper.addMessage(message);
+                            if (!added) {
+                                Log.e(TAG, "Failed to add message to local database: " + message.getText());
+                            } else {
+                                Log.d(TAG, "Successfully added message: " + message.getText());
+                            }
                         }
                         
                         long endTime = System.currentTimeMillis();
@@ -125,6 +137,8 @@ public class FirebaseDataManager {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.e(TAG, "Firebase messages sync cancelled: " + databaseError.getMessage());
+                Log.e(TAG, "Firebase error code: " + databaseError.getCode());
+                Log.e(TAG, "Firebase error details: " + databaseError.getDetails());
                 callback.onError("Firebase Fehler: " + databaseError.getMessage());
             }
         });
@@ -234,16 +248,34 @@ public class FirebaseDataManager {
     }
     
     private boolean messagesAreEqual(List<Message> local, List<Message> firebase) {
+        if (local == null && firebase == null) {
+            return true;
+        }
+        if (local == null || firebase == null) {
+            return false;
+        }
         if (local.size() != firebase.size()) {
             return false;
         }
         
         for (Message localMsg : local) {
+            if (localMsg == null) continue;
+            
             boolean found = false;
             for (Message firebaseMsg : firebase) {
-                if (localMsg.getText().equals(firebaseMsg.getText()) &&
-                    localMsg.getType().equals(firebaseMsg.getType()) &&
-                    localMsg.getUnlockDate().equals(firebaseMsg.getUnlockDate())) {
+                if (firebaseMsg == null) continue;
+                
+                String localText = localMsg.getText();
+                String localType = localMsg.getType();
+                String localUnlockDate = localMsg.getUnlockDate();
+                
+                String firebaseText = firebaseMsg.getText();
+                String firebaseType = firebaseMsg.getType();
+                String firebaseUnlockDate = firebaseMsg.getUnlockDate();
+                
+                if (localText != null && localText.equals(firebaseText) &&
+                    localType != null && localType.equals(firebaseType) &&
+                    localUnlockDate != null && localUnlockDate.equals(firebaseUnlockDate)) {
                     found = true;
                     break;
                 }
@@ -256,18 +288,38 @@ public class FirebaseDataManager {
     }
     
     private boolean timelineEventsAreEqual(List<TimelineEvent> local, List<TimelineEvent> firebase) {
+        if (local == null && firebase == null) {
+            return true;
+        }
+        if (local == null || firebase == null) {
+            return false;
+        }
         if (local.size() != firebase.size()) {
             return false;
         }
         
         for (TimelineEvent localEvent : local) {
+            if (localEvent == null) continue;
+            
             boolean found = false;
             for (TimelineEvent firebaseEvent : firebase) {
-                if (localEvent.getTitle().equals(firebaseEvent.getTitle()) &&
-                    localEvent.getDate().equals(firebaseEvent.getDate()) &&
-                    localEvent.getType().equals(firebaseEvent.getType()) &&
-                    ((localEvent.getDescription() == null && firebaseEvent.getDescription() == null) ||
-                     (localEvent.getDescription() != null && localEvent.getDescription().equals(firebaseEvent.getDescription())))) {
+                if (firebaseEvent == null) continue;
+                
+                String localTitle = localEvent.getTitle();
+                String localDate = localEvent.getDate();
+                String localType = localEvent.getType();
+                String localDescription = localEvent.getDescription();
+                
+                String firebaseTitle = firebaseEvent.getTitle();
+                String firebaseDate = firebaseEvent.getDate();
+                String firebaseType = firebaseEvent.getType();
+                String firebaseDescription = firebaseEvent.getDescription();
+                
+                if (localTitle != null && localTitle.equals(firebaseTitle) &&
+                    localDate != null && localDate.equals(firebaseDate) &&
+                    localType != null && localType.equals(firebaseType) &&
+                    ((localDescription == null && firebaseDescription == null) ||
+                     (localDescription != null && localDescription.equals(firebaseDescription)))) {
                     found = true;
                     break;
                 }

@@ -153,9 +153,8 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this,
                                 "❤️ " + newMessagesCount + " Nachrichten synchronisiert!",
                                 Toast.LENGTH_SHORT).show();
-                    } else if (newMessagesCount == 0) {
-                        Log.d("MainActivity", "Messages are up to date - no changes");
-                        Toast.makeText(MainActivity.this, "✅ Nachrichten sind bereits aktuell", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "✅ Keine Nachrichten in Firebase", Toast.LENGTH_SHORT).show();
                     }
                     // Reload today's message after successful sync
                     loadTodaysMessage();
@@ -187,9 +186,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int newEventsCount) {
                 if (newEventsCount > 0) {
-                    Log.d("MainActivity", "Successfully synced " + newEventsCount + " timeline events");
+                    Log.d("MainActivity", "Successfully added " + newEventsCount + " new timeline events");
                     Toast.makeText(MainActivity.this,
-                            "📅 " + newEventsCount + " Timeline-Events synchronisiert!",
+                            "❤️ " + newEventsCount + " neue Timeline-Events hinzugefügt!",
                             Toast.LENGTH_SHORT).show();
                 }
             }
