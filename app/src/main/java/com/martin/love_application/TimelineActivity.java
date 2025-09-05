@@ -90,13 +90,14 @@ public class TimelineActivity extends AppCompatActivity {
     private void updateHeaderStats() {
         // Update total memories count
         if (timelineEvents != null && totalMemories != null) {
-            totalMemories.setText(String.valueOf(timelineEvents.size()));
+            int count = timelineEvents.size();
+            totalMemories.setText(count + " Erinnerungen");
         }
         
         // Calculate and update days together
         if (daysTogether != null) {
             int days = calculateDaysTogether();
-            daysTogether.setText(String.valueOf(days));
+            daysTogether.setText(days + " Tage");
         }
     }
     
