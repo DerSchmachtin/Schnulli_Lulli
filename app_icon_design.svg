@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Pink gradient background -->
+    <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbcfe8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f472b6;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Glow effect -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Drop shadow -->
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  
+  <!-- App icon rounded rectangle background -->
+  <rect x="8" y="8" width="240" height="240" rx="56" ry="56" 
+        fill="url(#pinkGradient)" 
+        stroke="white" stroke-width="4"
+        filter="url(#dropShadow)"/>
+  
+  <!-- Main heart shape -->
+  <g transform="translate(128,110) rotate(-15) scale(1.2)">
+    <!-- Heart path -->
+    <path d="M0,20 C-20,-10 -60,-10 -60,20 C-60,40 0,80 0,80 C0,80 60,40 60,20 C60,-10 20,-10 0,20Z"
+          fill="white" opacity="0.9" filter="url(#glow)">
+      <!-- Breathing animation -->
+      <animateTransform attributeName="transform" 
+                        type="scale" 
+                        values="0.95;1.05;0.95" 
+                        dur="3s" 
+                        repeatCount="indefinite"/>
+    </path>
+  </g>
+  
+  <!-- Small love note icon (top right) -->
+  <rect x="196" y="28" width="32" height="32" rx="8" ry="8" 
+        fill="white" opacity="0.9" filter="url(#dropShadow)"/>
+  <text x="212" y="48" font-family="Arial" font-size="16" text-anchor="middle" fill="#f472b6">♥</text>
+  
+  <!-- Timeline line at bottom -->
+  <rect x="53" y="220" width="150" height="3" rx="1.5" ry="1.5" 
+        fill="white" opacity="0.7"/>
+  
+  <!-- Small timeline dots -->
+  <circle cx="70" cy="221.5" r="2" fill="white" opacity="0.8"/>
+  <circle cx="128" cy="221.5" r="2" fill="white" opacity="0.8"/>
+  <circle cx="186" cy="221.5" r="2" fill="white" opacity="0.8"/>
+</svg>
